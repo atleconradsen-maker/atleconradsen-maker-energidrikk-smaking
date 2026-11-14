@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energidrikk-testen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07122b; --panel:#0e1c3d; --panel2:#142650; --line:#223766;
+    --text:#f4f6fb; --muted:#9fb0d0; --acid:#e2c98f; --acid-ink:#1a1408;
+    --hot:#ff5a6e; --cool:#4aa3ff;
+    --r:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button,input,select,textarea{font:inherit;color:inherit}
+  .wrap{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+
+  /* Header */
+  header{display:flex;align-items:center;gap:16px;padding:8px 0 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .logo-box{width:112px;height:112px;border-radius:50%;overflow:hidden;flex:0 0 auto;box-shadow:0 0 0 3px var(--acid),0 10px 30px rgba(0,0,0,.5);background:#fff}
+  .logo-box img{width:100%;height:100%;object-fit:cover;display:block}
+  @media (max-width:520px){.logo-box{width:84px;height:84px}}
+  body{background:radial-gradient(1200px 500px at 50% -200px,#16306b 0%,var(--bg) 60%) fixed,var(--bg)}
+  .brand{flex:1;min-width:200px}
+  .brand h1{font-family:Anton,Impact,sans-serif;font-weight:400;letter-spacing:.5px;font-size:clamp(30px,6vw,46px);line-height:1;margin:0;text-transform:uppercase}
+  .brand h1 span{color:var(--acid)}
+  .brand p{margin:6px 0 0;color:var(--muted);font-size:14px}
+  .hdr-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{border:0;border-radius:999px;padding:11px 18px;font-weight:700;cursor:pointer;background:var(--panel2);border:1px solid var(--line);transition:transform .1s, background .15s}
+  .btn:hover{background:#252933}
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--acid);color:var(--acid-ink);border-color:var(--acid)}
+  .btn.primary:hover{background:#d6ff4d}
+  .btn.small{padding:7px 12px;font-size:13px}
+  .btn.danger{color:var(--hot)}
+  .btn.danger.armed{background:var(--hot);color:#fff;border-color:var(--hot)}
+  .hidden{display:none!important}
+
+  .status{margin:16px 0 0;padding:12px 14px;border-radius:12px;background:var(--panel);color:var(--muted);font-size:14px;border:1px solid var(--line)}
+
+  /* Tabs */
+  nav.tabs{display:flex;gap:6px;margin:22px 0 18px;background:var(--panel);padding:5px;border-radius:999px;width:max-content;max-width:100%;overflow-x:auto;border:1px solid var(--line)}
+  nav.tabs button{background:none;border:0;padding:9px 16px;border-radius:999px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+  nav.tabs button.on{background:var(--text);color:var(--bg)}
+
+  h2.sec{font-family:Anton;font-weight:400;font-size:26px;text-transform:uppercase;letter-spacing:.5px;margin:26px 0 12px}
+  h2.sec small{font-family:Inter;font-size:13px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:500;margin-left:8px}
+
+  /* Week hero */
+  .hero{background:linear-gradient(135deg,#1b3470 0%, #0e1c3d 60%);border:1px solid #3a4f86;border-radius:22px;padding:22px}
+  .hero-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .kicker{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--acid)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:14px;align-items:start}
+
+  /* Card */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+  .card-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .card-h h3{margin:0;font-size:18px;font-weight:800;line-height:1.2}
+  .meta{color:var(--muted);font-size:13px;margin-top:3px}
+  .total{font-family:Anton;font-size:40px;line-height:.9;text-align:right}
+  .total small{display:block;font-family:Inter;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-top:4px}
+  .bars{display:grid;gap:8px}
+  .bar-row{display:grid;grid-template-columns:96px 1fr 34px;align-items:center;gap:8px;font-size:13px}
+  .bar-row .lbl{color:var(--muted);font-weight:600}
+  .bar{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:99px}
+  .bar-row b{text-align:right;font-variant-numeric:tabular-nums}
+  .testers{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:12px;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:4px 9px;color:var(--muted)}
+  .chip b{color:var(--text)}
+  .notes{font-size:13px;color:#c9ced6;font-style:italic;margin:0}
+  .card-actions{display:flex;gap:6px;justify-content:flex-end}
+
+  /* Leaderboard */
+  .lb-ctrl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)}
+  .pill.on{border-color:var(--acid);color:var(--acid)}
+  .lb{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .lb-row{display:grid;grid-template-columns:44px 1fr 64px 64px 64px;align-items:center;gap:6px;padding:12px 14px;border-top:1px solid var(--line)}
+  .lb-row:first-child{border-top:0}
+  .lb-row.head{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--panel2)}
+  .lb-row .rank{font-family:Anton;font-size:22px;color:var(--muted)}
+  .lb-row:nth-child(2) .rank{color:var(--acid)}
+  .lb-row .nm{font-weight:700;min-width:0}
+  .lb-row .nm div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-row .nm small{display:block;color:var(--muted);font-weight:500;font-size:12px}
+  .lb-row .num{text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+  .lb-row .num.sel{color:var(--acid)}
+  @media (max-width:520px){
+    .lb-row{grid-template-columns:32px 1fr 48px 48px 48px;padding:11px 10px;font-size:14px}
+    .bar-row{grid-template-columns:84px 1fr 30px}
+  }
+
+  .empty{text-align:center;color:var(--muted);padding:40px 16px;border:1px dashed var(--line);border-radius:var(--r)}
+  .empty strong{display:block;color:var(--text);font-size:18px;margin-bottom:6px}
+
+  /* Week filter */
+  .filter{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+  select,input[type=text],input[type=number],input[type=week],textarea{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+  select:focus,input:focus,textarea:focus{outline:2px solid var(--acid);outline-offset:0;border-color:transparent}
+  .filter select{width:auto}
+
+  /* Modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow-y:auto;z-index:50}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:20px;width:100%;max-width:560px;padding:20px}
+  .modal h3{font-family:Anton;font-weight:400;font-size:26px;text-transform:uppercase;margin:0 0 14px}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fgrid .full{grid-column:1/-1}
+  label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .scores-h{display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px}
+  .scores-h b{font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+  .srow{display:grid;grid-template-columns:1fr 1fr 1fr 34px;gap:8px;align-items:end;margin-bottom:8px;padding:10px;background:var(--panel2);border-radius:12px}
+  .srow input,.srow select{background:var(--bg)}
+  .srow .x{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;height:40px}
+  .srow label.f{font-size:10px}
+  @media (max-width:520px){.srow{grid-template-columns:1fr 1fr 34px}.srow .nmf{grid-column:1/-1}}
+  .modal-foot{display:flex;justify-content:space-between;gap:8px;margin-top:18px;align-items:center}
+  .err{color:var(--hot);font-size:13px;margin-top:10px}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+
+  .updated{font-size:12px;color:var(--muted)}
+  .card .pic{margin:-16px -16px 0;height:200px;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:radial-gradient(circle at 50% 60%,#1e3a7a,#0a1530);cursor:zoom-in;position:relative}
+  .card .pic img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+  .card:hover .pic img{transform:scale(1.04)}
+  .pod .ph{width:64px;height:64px;border-radius:50%;object-fit:cover;margin-bottom:8px;border:2px solid var(--line);background:var(--panel2);cursor:zoom-in}
+  .pod.p1 .ph{width:84px;height:84px;border-color:var(--acid);box-shadow:0 0 24px rgba(226,201,143,.45)}
+  .award .thumb{position:absolute;right:-18px;bottom:-18px;width:96px;height:96px;border-radius:50%;object-fit:cover;opacity:.35;z-index:-1;-webkit-mask:radial-gradient(circle,#000 40%,transparent 72%);mask:radial-gradient(circle,#000 40%,transparent 72%)}
+  .lightbox{position:fixed;inset:0;z-index:60;background:rgba(3,8,20,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+  .lightbox img{max-width:100%;max-height:82vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:rise .35s ease both}
+  .lightbox .cap{margin-top:12px;font-weight:800;font-size:18px}
+
+  /* ---------- Awards ---------- */
+  .awards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:8px}
+  .award{position:relative;border-radius:18px;padding:18px 16px 16px;background:linear-gradient(160deg,#18306a,#0d1a3a 70%);overflow:hidden;isolation:isolate}
+  .award::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;z-index:-1;
+    background:linear-gradient(120deg,transparent 20%,var(--acid) 45%,#fff6dc 50%,var(--acid) 55%,transparent 80%) 0 0/250% 100%,linear-gradient(#2c4280,#2c4280);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+    animation:shine 4.5s linear infinite}
+  .award .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(226,201,143,.12);color:var(--acid);margin-bottom:12px}
+  .award .ico svg{width:26px;height:26px}
+  .award .t{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--acid)}
+  .award .who{font-size:18px;font-weight:800;margin:4px 0 2px;line-height:1.2;min-height:22px}
+  .award .sub{font-size:12px;color:var(--muted)}
+  .award .big{position:absolute;right:14px;top:12px;font-family:Anton;font-size:44px;line-height:1;color:#fff;text-shadow:0 0 24px rgba(226,201,143,.45)}
+  .award .big small{font-size:16px;color:var(--muted);text-shadow:none}
+  .award.none .who{color:var(--muted);font-weight:600;font-size:14px}
+  @keyframes shine{to{background-position:-250% 0,0 0}}
+
+  /* ---------- Podium ---------- */
+  .podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:10px;margin:8px 0 22px;padding-top:70px;position:relative}
+  .pod{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+  .pod .nm{font-weight:800;font-size:15px;line-height:1.2;margin-bottom:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .pod .br{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .pod .sc{font-family:Anton;font-size:30px;line-height:1;margin-bottom:8px}
+  .pod .block{width:100%;border-radius:14px 14px 4px 4px;display:grid;place-items:start center;padding-top:10px;font-family:Anton;font-size:40px;color:rgba(255,255,255,.9);transform-origin:bottom;
+    background:linear-gradient(180deg,#2a4790,#132755);box-shadow:inset 0 1px 0 rgba(255,255,255,.15)}
+  .pod.p1 .block{height:150px;background:linear-gradient(180deg,#f1dcaa,#b8995a);color:#2a1f05}
+  .pod.p2 .block{height:110px;background:linear-gradient(180deg,#d9e1ee,#8794ab);color:#1c2433}
+  .pod.p3 .block{height:84px;background:linear-gradient(180deg,#d7a27a,#8a5a3a);color:#2b1608}
+  .pod.p1{position:relative}
+  .pod .crown{width:58px;height:44px;color:var(--acid);margin-bottom:4px;filter:drop-shadow(0 0 10px rgba(226,201,143,.6))}
+  .rays{position:absolute;left:50%;top:-40px;width:320px;height:320px;transform:translateX(-50%);pointer-events:none;z-index:-1;
+    background:repeating-conic-gradient(from 0deg,rgba(226,201,143,.16) 0 6deg,transparent 6deg 18deg);
+    -webkit-mask:radial-gradient(circle,#000 0 30%,transparent 68%);mask:radial-gradient(circle,#000 0 30%,transparent 68%);
+    animation:spin 30s linear infinite}
+  .podium-wrap{position:relative;isolation:isolate;overflow:hidden;padding:0 4px}
+  @keyframes spin{to{transform:translateX(-50%) rotate(360deg)}}
+
+  /* ---------- Jury ---------- */
+  .jury{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .judge{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center}
+  .avatar{width:52px;height:52px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-family:Anton;font-size:20px;color:#0b1530;background:linear-gradient(135deg,#f1dcaa,#b8995a)}
+  .judge .jn{font-weight:800}
+  .judge .tag{display:inline-block;margin-top:4px;font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--panel2);color:var(--muted)}
+  .judge .tag.kind{background:rgba(155,225,93,.15);color:#9be15d}
+  .judge .tag.hard{background:rgba(255,90,110,.15);color:var(--hot)}
+  .judge .st{font-size:12px;color:var(--muted);margin-top:4px}
+  .judge .st b{color:var(--text)}
+
+  /* ---------- Entrance animations (only when body.anim) ---------- */
+  body.anim .award,body.anim .card,body.anim .judge,body.anim .lb-row:not(.head){animation:rise .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 70ms)}
+  body.anim .bar i{animation:grow 1s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 70ms + 200ms);transform-origin:left}
+  body.anim .pod .block{animation:lift .8s cubic-bezier(.2,1.2,.3,1) both}
+  body.anim .pod.p2 .block{animation-delay:.15s} body.anim .pod.p1 .block{animation-delay:.35s} body.anim .pod.p3 .block{animation-delay:0s}
+  body.anim .pod .nm,body.anim .pod .br,body.anim .pod .sc{animation:fade .5s ease both;animation-delay:.8s}
+  body.anim .pod .crown{animation:drop .7s cubic-bezier(.2,1.4,.4,1) 1.1s both}
+  .pod .crown{animation:bob 3s ease-in-out infinite}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes lift{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes drop{from{opacity:0;transform:translateY(-40px) rotate(-20deg)}to{opacity:1;transform:none}}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-5px) rotate(4deg)}}
+  @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-box"><img src="logo.jpg" alt="Energidrikk Smaking – logo"></div>
+    <div class="brand">
+      <h1>Energidrikk <span>Smaking</span></h1>
+      <p>Test · Smak · Kåring — smak og smak vs. pris, 1–10. Ny test hver uke.</p>
+    </div>
+    <div class="hdr-actions"><span class="updated" id="updated"></span></div>
+  </header>
+
+  <div class="status" id="status">Laster tester …</div>
+
+  <nav class="tabs" id="tabs">
+    <button data-view="week" class="on">Ukens test</button>
+    <button data-view="board">Toppliste</button>
+    <button data-view="all">Alle tester</button>
+  </nav>
+
+  <section id="view-week"></section>
+  <section id="view-board" class="hidden"></section>
+  <section id="view-all" class="hidden"></section>
+</div>
+
+<div class="lightbox hidden" id="lightbox"><img alt=""><div class="cap"></div></div>
+
+<script src="config.js"></script>
+<script src="parse.js"></script>
+<script>
+(() => {
+  // ---------- helpers ----------
+  const $ = s => document.querySelector(s);
+  const el = (tag, attrs = {}, ...kids) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+      else if (v !== undefined && v !== null && v !== false) n.setAttribute(k, v);
+    }
+    for (const c of kids.flat()) if (c != null) n.append(c);
+    return n;
+  };
+  const num = v => (typeof v === 'number' && isFinite(v)) ? v : null;
+  const clampScore = v => { const n = Number(v); return isFinite(n) ? Math.min(10, Math.max(1, Math.round(n))) : null; };
+  const avg = arr => { const a = arr.filter(x => x != null); return a.length ? a.reduce((s, x) => s + x, 0) / a.length : null; };
+  const fmt = v => v == null ? '–' : (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');
+  const kr = v => v == null ? null : (Math.round(v * 100) / 100).toLocaleString('nb-NO', {minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2}) + ' kr';
+  const color = v => {
+    if (v == null) return '#444';
+    if (v >= 8) return 'var(--acid)';
+    if (v >= 6.5) return '#9be15d';
+    if (v >= 5) return '#ffd23f';
+    if (v >= 3.5) return '#ff9a3c';
+    return 'var(--hot)';
+  };
+  function isoWeek(d = new Date()) {
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const day = t.getUTCDay() || 7;
+    t.setUTCDate(t.getUTCDate() + 4 - day);
+    const y = t.getUTCFullYear();
+    const w = Math.ceil(((t - Date.UTC(y, 0, 1)) / 86400000 + 1) / 7);
+    return `${y}-W${String(w).padStart(2, '0')}`;
+  }
+  const weekLabel = w => {
+    const m = /^(\d{4})-W(\d{1,2})$/.exec(w || '');
+    return m ? `Uke ${Number(m[2])} · ${m[1]}` : (w || 'Ukjent uke');
+  };
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+
+  let TESTERS = ['Itrat Zishan', 'Tobias Frost', 'Atle Conradsen'];
+
+  // ---------- state ----------
+  let db = null, assets = null, user = null;
+  let canWrite = false, canEditSite = false;
+  let tests = [];            // normalized
+  let settings = {};
+  let view = 'week';
+  let boardSort = 'total';
+  let allWeek = 'all';
+  let editingId = null;
+
+  function normalize(d) {
+    const scores = Array.isArray(d.scores) ? d.scores.map(s => ({
+      name: typeof s?.name === 'string' ? s.name.slice(0, 40) : '',
+      taste: clampScore(s?.taste),
+      value: clampScore(s?.value)
+    })).filter(s => s.taste != null || s.value != null) : [];
+    const taste = avg(scores.map(s => s.taste));
+    const value = avg(scores.map(s => s.value));
+    const total = (taste != null && value != null) ? (taste + value) / 2 : (taste ?? value);
+    const price = num(d.price), ml = num(d.ml);
+    return {
+      id: String(d.id || ''),
+      image: typeof d.image === 'string' && /^https?:\/\//.test(d.image) ? d.image : null,
+      drink: typeof d.drink === 'string' ? d.drink : 'Uten navn',
+      brand: typeof d.brand === 'string' ? d.brand : '',
+      week: typeof d.week === 'string' ? d.week : '',
+      price, ml,
+      perL: (price != null && ml) ? price / ml * 1000 : null,
+      notes: typeof d.notes === 'string' ? d.notes : '',
+      createdAt: num(d.createdAt) || 0,
+      scores, taste, value, total
+    };
+  }
+
+  // ---------- rendering ----------
+  function scoreBar(label, v) {
+    return el('div', {class: 'bar-row'},
+      el('span', {class: 'lbl', text: label}),
+      el('div', {class: 'bar'}, (() => { const i = el('i'); i.style.width = (v ? v * 10 : 0) + '%'; i.style.background = color(v); return i; })()),
+      el('b', {text: fmt(v)})
+    );
+  }
+
+  function card(t) {
+    const metaBits = [t.brand, kr(t.price), t.ml ? t.ml + ' ml' : null, t.perL != null ? kr(t.perL) + '/l' : null].filter(Boolean);
+    const totalEl = el('div', {class: 'total'}, fmt(t.total), el('small', {text: 'Total'}));
+    totalEl.style.color = color(t.total);
+    const pic = t.image ? el('div', {class: 'pic', onclick: () => openImg(t.image, t.drink)}, img(t.image, null, t.drink)) : null;
+    return el('article', {class: 'card'},
+      pic,
+      el('div', {class: 'card-h'},
+        el('div', {},
+          el('h3', {text: t.drink}),
+          el('div', {class: 'meta', text: metaBits.join(' · ') || ' '}),
+          el('div', {class: 'meta', text: weekLabel(t.week)})
+        ),
+        totalEl
+      ),
+      el('div', {class: 'bars'}, scoreBar('Smak', t.taste), scoreBar('Smak vs pris', t.value)),
+      t.scores.length ? el('div', {class: 'testers'}, t.scores.map(s =>
+        el('span', {class: 'chip'}, (s.name || 'Anonym') + ' ', el('b', {text: `${s.taste ?? '–'} / ${s.value ?? '–'}`}))
+      )) : null,
+      t.notes ? el('p', {class: 'notes', text: '«' + t.notes + '»'}) : null
+    );
+  }
+
+  function emptyBox(title, text) {
+    return el('div', {class: 'empty'}, el('strong', {text: title}), text,
+      null);
+  }
+
+  function weeksSorted() {
+    return [...new Set(tests.map(t => t.week).filter(Boolean))].sort().reverse();
+  }
+
+  // ---------- icons ----------
+  const svg = (paths, vb = '0 0 24 24') => { const w = document.createElement('span'); w.innerHTML = `<svg viewBox="${vb}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`; return w.firstChild; };
+  const ICON = {
+    crown: () => svg('<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5L3 8z"/>'),
+    bolt: () => svg('<path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="currentColor" stroke="none"/>'),
+    trophy: () => svg('<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4z"/><path d="M17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3"/>'),
+    star: () => svg('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'),
+    bigCrown: () => svg('<path d="M4 34L10 10l13 14L32 4l9 20 13-14 6 24z" fill="currentColor" opacity=".25"/><path d="M4 34L10 10l13 14L32 4l9 20 13-14 6 24z"/><path d="M6 40h52"/>', '0 0 64 44')
+  };
+
+  // ---------- animation helpers ----------
+  let animate = true;           // animate on first data + tab switches only
+  function countUp(node, target, decimals = 1, suffix = '') {
+    const final = target == null ? '–' : fmtN(target, decimals) + suffix;
+    if (!animate || target == null || matchMedia('(prefers-reduced-motion: reduce)').matches) { node.textContent = final; return; }
+    const t0 = performance.now(), dur = 1100;
+    const step = now => {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      node.textContent = fmtN(target * e, decimals) + suffix;
+      if (p < 1) requestAnimationFrame(step); else node.textContent = final;
+    };
+    node.textContent = fmtN(0, decimals) + suffix;
+    requestAnimationFrame(step);
+  }
+  const fmtN = (v, d) => v.toFixed(d).replace('.', ',');
+  const stagger = (nodes) => { nodes.forEach((n, i) => n.style.setProperty('--i', i)); return nodes; };
+  function playAnim() {
+    animate = true;
+    document.body.classList.remove('anim'); void document.body.offsetWidth; document.body.classList.add('anim');
+    clearTimeout(playAnim.t); playAnim.t = setTimeout(() => { animate = false; document.body.classList.remove('anim'); }, 2600);
+  }
+
+  // ---------- awards ----------
+  function bestBy(list, key, dir = 'desc') {
+    const l = list.filter(t => t[key] != null);
+    if (!l.length) return null;
+    return l.reduce((a, b) => (dir === 'desc' ? b[key] > a[key] : b[key] < a[key]) ? b : a);
+  }
+  function awardCard(icon, title, t, key, sub, opts = {}) {
+    const big = el('div', {class: 'big'});
+    const node = el('div', {class: 'award' + (t ? '' : ' none')},
+      el('div', {class: 'ico'}, icon()),
+      el('div', {class: 't', text: title}),
+      el('div', {class: 'who', text: t ? t.drink : 'Ingen kandidat ennå'}),
+      el('div', {class: 'sub', text: t ? sub(t) : 'Kåres når første test er lagt inn'}),
+      t ? big : null,
+      t && t.image ? img(t.image, 'thumb') : null
+    );
+    if (t) countUp(big, opts.value ? opts.value(t) : t[key], opts.decimals ?? 1, opts.suffix || '');
+    return node;
+  }
+  function renderAwards(box) {
+    const weeks = weeksSorted();
+    const thisWeek = tests.filter(t => t.week === weeks[0]);
+    const n = tests.length;
+    const cards = [
+      awardCard(ICON.crown, 'Smakskongen', bestBy(tests, 'taste'), 'taste', t => `Best smak av ${n} tester`),
+      awardCard(ICON.bolt, 'Value for money', bestBy(tests, 'value'), 'value', t => t.perL != null ? `${kr(t.perL)} per liter` : 'Mest smak for pengene'),
+      awardCard(ICON.trophy, 'Totalvinner', bestBy(tests, 'total'), 'total', t => [t.brand, weekLabel(t.week)].filter(Boolean).join(' · ')),
+      awardCard(ICON.star, 'Ukens vinner', bestBy(thisWeek, 'total'), 'total', t => weekLabel(t.week))
+    ];
+    box.append(el('div', {class: 'awards'}, stagger(cards)));
+  }
+
+  // ---------- podium ----------
+  function podium(list, key) {
+    const top = list.filter(t => t[key] != null).slice(0, 3);
+    if (!top.length) return null;
+    const pod = (t, place) => {
+      if (!t) return el('div', {class: 'pod p' + place});
+      const sc = el('div', {class: 'sc'}); sc.style.color = place === 1 ? 'var(--acid)' : '#fff';
+      countUp(sc, t[key]);
+      return el('div', {class: 'pod p' + place},
+        place === 1 ? (() => { const c = ICON.bigCrown(); c.classList.add('crown'); return c; })() : null,
+        t.image ? (() => { const i = img(t.image, 'ph', t.drink); i.addEventListener('click', () => openImg(t.image, t.drink)); return i; })() : null,
+        el('div', {class: 'nm', text: t.drink}),
+        el('div', {class: 'br', text: t.brand || weekLabel(t.week)}),
+        sc,
+        el('div', {class: 'block', text: String(place)})
+      );
+    };
+    return el('div', {class: 'podium-wrap'},
+      el('div', {class: 'podium'}, el('div', {class: 'rays'}), pod(top[1], 2), pod(top[0], 1), pod(top[2], 3)));
+  }
+
+  // ---------- jury ----------
+  function renderJury(box) {
+    const by = new Map();
+    for (const t of tests) for (const s of t.scores) {
+      const k = (s.name || 'Anonym').trim();
+      if (!by.has(k)) by.set(k, {name: k, taste: [], value: []});
+      const j = by.get(k);
+      if (s.taste != null) j.taste.push(s.taste);
+      if (s.value != null) j.value.push(s.value);
+    }
+    TESTERS.forEach(n => { if (!by.has(n)) by.set(n, {name: n, taste: [], value: []}); });
+    const judges = [...by.values()].map(j => ({...j, avg: avg([...j.taste, ...j.value]), count: Math.max(j.taste.length, j.value.length)}));
+    const rated = judges.filter(j => j.avg != null);
+    const kind = rated.length > 1 ? rated.reduce((a, b) => b.avg > a.avg ? b : a) : null;
+    const hard = rated.length > 1 ? rated.reduce((a, b) => b.avg < a.avg ? b : a) : null;
+    box.append(el('h2', {class: 'sec'}, 'Dommerpanelet', el('small', {text: 'snittscore gitt'})));
+    const cards = judges.map(j => {
+      const initials = j.name.split(/\s+/).map(w => w[0] || '').join('').slice(0, 2).toUpperCase();
+      const tag = j === kind ? el('span', {class: 'tag kind', text: 'Snillest'}) : j === hard ? el('span', {class: 'tag hard', text: 'Strengest'}) : null;
+      return el('div', {class: 'judge'},
+        el('div', {class: 'avatar', text: initials || '?'}),
+        el('div', {style: 'min-width:0;flex:1'},
+          el('div', {class: 'jn', text: j.name}),
+          el('div', {class: 'st'}, 'Smak ', el('b', {text: fmt(avg(j.taste))}), ' · Verdi ', el('b', {text: fmt(avg(j.value))}), ` · ${j.count} tester`),
+          tag)
+      );
+    });
+    box.append(el('div', {class: 'jury'}, stagger(cards)));
+  }
+
+  function renderWeek() {
+    const box = $('#view-week'); box.replaceChildren();
+    renderAwards(box);
+    if (!tests.length) { box.append(el('div', {style: 'height:14px'}), emptyBox('Ingen tester ennå', 'Når dere legger inn den første testen, dukker den opp her.')); renderJury(box); return; }
+    const latest = weeksSorted()[0];
+    const items = tests.filter(t => t.week === latest).sort((a, b) => (b.total ?? -1) - (a.total ?? -1));
+    const hero = el('div', {class: 'hero', style: 'margin-top:22px'},
+      el('div', {class: 'hero-top'},
+        el('div', {}, el('div', {class: 'kicker', text: 'Siste test'}), el('h2', {class: 'sec', style: 'margin:4px 0 0', text: weekLabel(latest)})),
+        el('div', {class: 'meta', text: items.length + (items.length === 1 ? ' drikk testet' : ' drikker testet')})
+      ),
+      el('div', {class: 'grid'}, stagger(items.map(card)))
+    );
+    box.append(hero);
+    renderJury(box);
+  }
+
+  function boardTable(list, sortKey) {
+    const t = el('div', {class: 'lb'},
+      el('div', {class: 'lb-row head'},
+        el('span', {text: '#'}), el('span', {text: 'Drikk'}),
+        el('span', {class: 'num', text: 'Smak'}), el('span', {class: 'num', text: 'Verdi'}), el('span', {class: 'num', text: 'Total'}))
+    );
+    list.forEach((x, i) => {
+      const cell = (k, v) => { const n = el('span', {class: 'num' + (k === sortKey ? ' sel' : ''), text: fmt(v)}); if (k !== sortKey) n.style.color = color(v); return n; };
+      const row = el('div', {class: 'lb-row'},
+        el('span', {class: 'rank', text: String(i + 1)}),
+        el('span', {class: 'nm'}, el('div', {text: x.drink}), el('small', {text: [x.brand, weekLabel(x.week), kr(x.price)].filter(Boolean).join(' · ')})),
+        cell('taste', x.taste), cell('value', x.value), cell('total', x.total)
+      );
+      row.style.setProperty('--i', Math.min(i, 12));
+      t.append(row);
+    });
+    return t;
+  }
+
+  function renderBoard() {
+    const box = $('#view-board'); box.replaceChildren();
+    if (!tests.length) { box.append(emptyBox('Topplista er tom', 'Legg inn tester for å se hvem som topper.')); return; }
+    const opts = [['total', 'Total'], ['taste', 'Smak'], ['value', 'Value for money']];
+    box.append(el('div', {class: 'lb-ctrl'}, opts.map(([k, l]) =>
+      el('button', {class: 'pill' + (boardSort === k ? ' on' : ''), text: l, onclick: () => { boardSort = k; playAnim(); renderBoard(); }}))));
+    const list = [...tests].sort((a, b) => (b[boardSort] ?? -1) - (a[boardSort] ?? -1));
+    const p = podium(list, boardSort); if (p) box.append(p);
+    box.append(boardTable(list, boardSort));
+  }
+
+  function renderAll() {
+    const box = $('#view-all'); box.replaceChildren();
+    if (!tests.length) { box.append(emptyBox('Ingen tester ennå', 'Alle tester samles her, uke for uke.')); return; }
+    const weeks = weeksSorted();
+    if (allWeek !== 'all' && !weeks.includes(allWeek)) allWeek = 'all';
+    const sel = el('select', {onchange: e => { allWeek = e.target.value; renderAll(); }},
+      el('option', {value: 'all', text: 'Alle uker'}), weeks.map(w => el('option', {value: w, text: weekLabel(w)})));
+    sel.value = allWeek;
+    box.append(el('div', {class: 'filter'}, sel));
+    for (const w of weeks) {
+      if (allWeek !== 'all' && w !== allWeek) continue;
+      const items = tests.filter(t => t.week === w).sort((a, b) => (b.total ?? -1) - (a.total ?? -1));
+      box.append(el('h2', {class: 'sec'}, weekLabel(w), el('small', {text: items.length + (items.length === 1 ? ' drikk' : ' drikker')})));
+      box.append(el('div', {class: 'grid'}, items.map(card)));
+    }
+    const noWeek = tests.filter(t => !t.week);
+    if (noWeek.length && allWeek === 'all') {
+      box.append(el('h2', {class: 'sec', text: 'Uten uke'}), el('div', {class: 'grid'}, noWeek.map(card)));
+    }
+  }
+
+  function render() {
+    renderWeek(); renderBoard(); renderAll();
+  }
+
+  function setView(v) {
+    view = v;
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+    ['week', 'board', 'all'].forEach(k => $('#view-' + k).classList.toggle('hidden', k !== v));
+    if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v);
+  }
+  $('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.dataset.view !== view) { playAnim(); setView(b.dataset.view); render(); } });
+  window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (['week', 'board', 'all'].includes(h)) setView(h); });
+  { const h = location.hash.slice(1); if (['week', 'board', 'all'].includes(h)) setView(h); }
+
+  // ---------- lightbox ----------
+  function openImg(src, cap) { const lb = $('#lightbox'); lb.querySelector('img').src = src; lb.querySelector('.cap').textContent = cap || ''; lb.classList.remove('hidden'); }
+  $('#lightbox').addEventListener('click', () => $('#lightbox').classList.add('hidden'));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#lightbox').classList.add('hidden'); });
+  const img = (src, cls, alt) => { const i = el('img', {src, class: cls || null, alt: alt || '', loading: 'lazy', referrerpolicy: 'no-referrer'}); i.addEventListener('error', () => i.remove()); return i; };
+
+  // ---------- status ----------
+  function showStatus(msg) { const s = $('#status'); s.textContent = msg; s.classList.toggle('hidden', !msg); }
+
+  // ---------- boot ----------
+  async function fetchData() {
+    const id = (window.EDConfig || {}).SHEET_ID;
+    const base = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq`;
+    // 1) JSONP via <script> – no CORS needed
+    try {
+      const table = await new Promise((resolve, reject) => {
+        const cb = '__ed' + Date.now();
+        const sc = document.createElement('script');
+        const done = () => { delete window[cb]; sc.remove(); clearTimeout(t); };
+        const t = setTimeout(() => { done(); reject(new Error('timeout')); }, 12000);
+        window[cb] = res => { done(); res && res.status !== 'error' && res.table ? resolve(res.table) : reject(new Error('gviz error')); };
+        sc.onerror = () => { done(); reject(new Error('load error')); };
+        sc.src = `${base}?gid=0&headers=1&tqx=out:json;responseHandler:${cb}&_=${Date.now()}`;
+        document.head.append(sc);
+      });
+      return EDParse.parseRows(EDParse.gvizToRows(table));
+    } catch (e) {
+      // 2) CSV via fetch
+      const r = await fetch(`${base}?tqx=out:csv&gid=0&headers=1&_=${Date.now()}`);
+      const text = await r.text();
+      if (!r.ok || /^\s*</.test(text)) throw e;
+      return EDParse.parseSheet(text);
+    }
+  }
+  let lastJSON = '', loadedOnce = false;
+  async function load() {
+    try {
+      const data = await fetchData();
+      const json = JSON.stringify(data.tests || []);
+      if (Array.isArray(data.testers) && data.testers.length) TESTERS = data.testers;
+      if (json !== lastJSON) {
+        lastJSON = json;
+        tests = (data.tests || []).map(normalize);
+        if (!loadedOnce) playAnim();
+        render();
+      }
+      loadedOnce = true;
+      showStatus('');
+      $('#updated').textContent = 'Oppdatert ' + new Date().toLocaleTimeString('nb-NO', {hour: '2-digit', minute: '2-digit'});
+    } catch (e) {
+      if (!loadedOnce) showStatus('Får ikke hentet testene akkurat nå. Prøv igjen om litt.');
+    }
+  }
+  render();
+  load();
+  setInterval(() => { if (!document.hidden) load(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+})();
+</script>
+</body>
+</html>
