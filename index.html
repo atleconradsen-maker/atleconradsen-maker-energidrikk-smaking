@@ -162,6 +162,12 @@
   .pod.p2 .block{height:110px;background:linear-gradient(180deg,#d9e1ee,#8794ab);color:#1c2433}
   .pod.p3 .block{height:84px;background:linear-gradient(180deg,#d7a27a,#8a5a3a);color:#2b1608}
   .pod.p1{position:relative}
+  .pod .phs{display:flex;justify-content:center;margin-bottom:8px}
+  .pod .phs .ph{margin-bottom:0}
+  .pod.shared .phs .ph{width:52px;height:52px;margin-left:-14px;border:2px solid var(--bg)}
+  .pod.shared .phs .ph:first-child{margin-left:0}
+  .pod.shared .nm{font-size:13px;-webkit-line-clamp:1}
+  .pod.shared .br{color:var(--acid);font-weight:700}
   .pod .crown{width:58px;height:44px;color:var(--acid);margin-bottom:4px;filter:drop-shadow(0 0 10px rgba(226,201,143,.6))}
   .rays{position:absolute;left:50%;top:-40px;width:320px;height:320px;transform:translateX(-50%);pointer-events:none;z-index:-1;
     background:repeating-conic-gradient(from 0deg,rgba(226,201,143,.16) 0 6deg,transparent 6deg 18deg);
@@ -422,24 +428,28 @@
   // ---------- podium ----------
   function podium(list, key) {
     const scored = list.filter(t => t[key] != null);
-    const top = scored.slice(0, 3);
-    if (!top.length) return null;
+    if (!scored.length) return null;
     const rk = ranksFor(scored, key);
-    const pod = (t, place) => {
-      if (!t) return el('div', {class: 'pod p' + place});
+    // Én pallplass per plassering; alle som deler plassen står på samme pallplass
+    const ranks = [...new Set(rk)].sort((x, y) => x - y).filter(r => r <= 3).slice(0, 3);
+    const slots = ranks.map(r => ({ rank: r, items: scored.filter((_, i) => rk[i] === r) }));
+    const pod = (slot, place) => {
+      if (!slot) return el('div', {class: 'pod p' + place});
+      const items = slot.items, t = items[0];
       const sc = el('div', {class: 'sc'}); sc.style.color = place === 1 ? 'var(--acid)' : '#fff';
       countUp(sc, t[key]);
-      return el('div', {class: 'pod p' + place},
+      const pics = items.filter(x => x.image).slice(0, 4).map(x => { const i = img(x.image, 'ph', x.drink); i.addEventListener('click', () => openImg(x.image, x.drink)); return i; });
+      return el('div', {class: 'pod p' + place + (items.length > 1 ? ' shared' : '')},
         place === 1 ? (() => { const c = ICON.bigCrown(); c.classList.add('crown'); return c; })() : null,
-        t.image ? (() => { const i = img(t.image, 'ph', t.drink); i.addEventListener('click', () => openImg(t.image, t.drink)); return i; })() : null,
-        el('div', {class: 'nm', text: t.drink}),
-        el('div', {class: 'br', text: t.brand || weekLabel(t.week)}),
+        pics.length ? el('div', {class: 'phs'}, pics) : null,
+        items.map(x => el('div', {class: 'nm', text: x.drink})),
+        el('div', {class: 'br', text: items.length > 1 ? `Delt ${slot.rank}. plass` : (t.brand || weekLabel(t.week))}),
         sc,
-        el('div', {class: 'block', text: String(rk[place - 1])})
+        el('div', {class: 'block', text: String(slot.rank)})
       );
     };
     return el('div', {class: 'podium-wrap'},
-      el('div', {class: 'podium'}, el('div', {class: 'rays'}), pod(top[1], 2), pod(top[0], 1), pod(top[2], 3)));
+      el('div', {class: 'podium'}, el('div', {class: 'rays'}), pod(slots[1], 2), pod(slots[0], 1), pod(slots[2], 3)));
   }
 
   // ---------- jury ----------
