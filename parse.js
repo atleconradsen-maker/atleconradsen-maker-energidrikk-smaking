@@ -98,7 +98,8 @@
         brand: iBrand >= 0 ? String(r[iBrand] || '').trim().slice(0, 60) : '',
         week: wk ? `${Math.round(year)}-W${String(Math.round(wk)).padStart(2, '0')}` : '',
         price: iPrice >= 0 ? toNum(r[iPrice]) : null,
-        ml: iMl >= 0 ? toNum(r[iMl]) : null,
+        // Størrelse: tall opp til 100 er centiliter (33 = 33 cl = 330 ml)
+        ml: (() => { const v = iMl >= 0 ? toNum(r[iMl]) : null; return v != null && v > 0 && v <= 100 ? v * 10 : v; })(),
         image: iImg >= 0 ? imageUrl(r[iImg]) : null,
         notes: iNotes >= 0 ? String(r[iNotes] || '').trim().slice(0, 400) : '',
         scores
