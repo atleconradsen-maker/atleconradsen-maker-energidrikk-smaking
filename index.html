@@ -449,7 +449,7 @@
       );
     };
     return el('div', {class: 'podium-wrap'},
-      el('div', {class: 'podium'}, el('div', {class: 'rays'}), pod(slots[1], 2), pod(slots[0], 1), pod(slots[2], 3)));
+      el('div', {class: 'podium'}, el('div', {class: 'rays'}), pod(slots.find(x => x.rank === 2), 2), pod(slots.find(x => x.rank === 1), 1), pod(slots.find(x => x.rank === 3), 3)));
   }
 
   // ---------- jury ----------
