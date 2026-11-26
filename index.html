@@ -29,7 +29,7 @@
   .brand h1{font-family:Anton,Impact,sans-serif;font-weight:400;letter-spacing:.5px;font-size:clamp(30px,6vw,46px);line-height:1;margin:0;text-transform:uppercase}
   .brand h1 span{color:var(--acid)}
   .brand p{margin:6px 0 0;color:var(--muted);font-size:14px}
-  .hdr-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .hdr-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .btn{border:0;border-radius:999px;padding:11px 18px;font-weight:700;cursor:pointer;background:var(--panel2);border:1px solid var(--line);transition:transform .1s, background .15s}
   .btn:hover{background:#252933}
   .btn:active{transform:scale(.97)}
@@ -212,7 +212,7 @@
       <h1>Energidrikk <span>Smaking</span></h1>
       <p>Test · Smak · Kåring — smak og smak vs. pris, 1–10. Ny test hver uke.</p>
     </div>
-    <div class="hdr-actions"><span class="updated" id="updated"></span></div>
+    <div class="hdr-actions"><a class="btn primary" href="legg-inn.html" style="text-decoration:none">📸 Legg inn test</a><span class="updated" id="updated"></span></div>
   </header>
 
   <div class="status" id="status">Laster tester …</div>
@@ -230,7 +230,7 @@
 
 <div class="lightbox hidden" id="lightbox"><img alt=""><div class="cap"></div></div>
 
-<script src="config.js?v=202611251229"></script>
+<script src="config.js?v=202611260800"></script>
 <script src="parse.js?v=202611251229"></script>
 <script>
 (() => {
